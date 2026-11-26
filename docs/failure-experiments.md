@@ -1,4 +1,4 @@
-# Failure experiment backlog (not yet executed)
+# Failure experiments and backlog
 
 Experiments will be documented with: hypothesis, reproducible steps, observed symptom, logs/packet captures, root cause, and fix.
 
@@ -10,3 +10,4 @@ Experiments will be documented with: hypothesis, reproducible steps, observed sy
 | F-04 | Remove a route between Linux VMs | No route / timeout depending on topology | Not run |
 | F-05 | Firewall blocks destination port | Drop or rejection depending on policy | Not run |
 | F-06 | Simulate loss/latency | Measure transfer and retry behavior | Not run |
+| F-07 | Stop localhost HTTP origin while inspection proxy stays running | Proxy returns HTTP 502; after origin restart, HTTP 200 | **Completed 2026-11-26** — [evidence](http-proxy-failure-recovery.md) |
