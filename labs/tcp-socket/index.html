@@ -1,0 +1,127 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#08131e">
+  <meta name="description" content="A synthetic AMR socket lab: explore TCP connection establishment, application messages, and server responses.">
+  <title>AMR TCP Socket Lab — First Click Moment</title>
+  <style>
+    :root {color-scheme:dark;--bg:#07131d;--surface:#0d1d2c;--surface2:#14283a;--line:#233b4e;--muted:#a0b3c5;--cyan:#74d8f5;--green:#7be6ad;--amber:#ffd28c;--fg:#f1f7fc;--radius:18px}
+    *{box-sizing:border-box} html{scroll-behavior:smooth}
+    body{margin:0;background:radial-gradient(ellipse 80% 42% at 50% -10%,#20445a 0%,transparent 80%),var(--bg);color:var(--fg);font:15px/1.55 ui-sans-serif,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;overflow-x:hidden}
+    .wrap{width:min(1050px,calc(100% - 36px));margin:auto;padding-bottom:76px}
+    header{display:flex;justify-content:space-between;gap:16px;align-items:center;padding:28px 0 24px}
+    .mark{display:flex;align-items:center;gap:12px;color:#d9f5ff;font-size:12px;font-weight:800;letter-spacing:.12em}
+    .mark:before{content:"";height:14px;width:14px;background:var(--cyan);transform:rotate(45deg);border-radius:2px;box-shadow:0 0 25px #6edcf888}
+    .pill{border:1px solid #31576b;background:#112c3b;border-radius:999px;padding:6px 12px;color:#a4e8fb;font-size:11px;font-weight:700;letter-spacing:.09em}
+    h1{font-size:clamp(36px,5.4vw,70px);letter-spacing:-.055em;line-height:1.05;max-width:800px;margin:26px 0 16px}
+    h1 em{font-style:normal;color:var(--cyan)}
+    .lead{max-width:685px;color:#b2c4d3;font-size:clamp(15px,2.1vw,19px);margin:0 0 23px}
+    .label{color:var(--cyan);font-size:12px;font-weight:800;letter-spacing:.17em;text-transform:uppercase}
+    .callout{display:inline-flex;gap:9px;align-items:center;flex-wrap:wrap;border:1px solid #2b4e61;border-radius:9px;padding:9px 12px;color:#a6c5d2;background:#0d2130;font-size:12px;max-width:100%}
+    .dot{height:7px;width:7px;border-radius:100%;background:var(--green);box-shadow:0 0 11px var(--green);flex-shrink:0}
+    .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:30px 0}
+    .stat{border:1px solid var(--line);background:#0c1d2b;border-radius:14px;padding:15px 18px}
+    .stat span{display:block;font-size:11px;color:var(--muted);margin-bottom:4px;letter-spacing:.06em;text-transform:uppercase}
+    .stat strong{font-size:17px;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;letter-spacing:-.025em}
+    .panel{border:1px solid var(--line);background:linear-gradient(140deg,#102638,#0a1927);border-radius:var(--radius);padding:26px}
+    .section-header{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:18px}
+    h2{font-size:22px;letter-spacing:-.025em;margin:0}
+    .step{color:#9cb5c7;font-size:12px;font-weight:700}
+    .network{display:grid;grid-template-columns:minmax(0,1fr) 140px minmax(0,1fr);gap:12px;align-items:center;margin-top:12px}
+    .endpoint{min-height:187px;border:1px solid #38516a;background:linear-gradient(180deg,#193347,#0c2131);border-radius:14px;padding:22px;display:flex;flex-direction:column;justify-content:space-between;min-width:0}
+    .endpoint .name{font-weight:800;font-size:20px;letter-spacing:-.025em}
+    .endpoint .role{color:var(--muted);font-size:12px;margin-top:3px}
+    .endpoint .address{background:#0c1a2a;border:1px solid #2b455a;border-radius:6px;padding:8px;font:12px ui-monospace,SFMono-Regular,Menlo,monospace;color:#d5effe;word-break:break-word}
+    .endpoint .symbol{font-size:26px;line-height:1;float:right}
+    .route{position:relative;min-height:80px;display:flex;align-items:center;justify-content:center;text-align:center}
+    .route:before{content:"";width:100%;height:3px;background:#41667b;position:absolute;top:42%;left:0;border-radius:9px}
+    .route:after{content:"";position:absolute;right:0;top:calc(42% - 5px);width:11px;height:11px;transform:rotate(45deg);border-top:3px solid #7ad1e9;border-right:3px solid #7ad1e9}
+    .route span{position:relative;z-index:2;top:24px;font-size:11px;color:#9bcfe2;background:#102638;padding:4px 8px;border-radius:99px;white-space:nowrap}
+    .packet{width:13px;height:13px;border-radius:5px;background:var(--cyan);box-shadow:0 0 23px #56caff;position:absolute;left:0;top:calc(42% - 5px);opacity:0;z-index:3}
+    .route.active .packet{animation:travel 1s ease-in-out 2}
+    @keyframes travel{0%{left:0;opacity:0}15%{opacity:1}85%{opacity:1}100%{left:calc(100% - 13px);opacity:0}}
+    .controls{display:flex;gap:10px;flex-wrap:wrap;margin:22px 0 10px}
+    button{appearance:none;border:0;border-radius:11px;padding:12px 20px;font-size:14px;font-weight:800;cursor:pointer;transition:transform .15s,opacity .15s;touch-action:manipulation}
+    button:active:not(:disabled){transform:scale(.975)}button:disabled{opacity:.42;cursor:not-allowed}
+    .primary{background:var(--cyan);color:#052030}.secondary{background:var(--green);color:#042219}.ghost{background:#24394b;color:#d5e9f5}
+    .hint{font-size:12px;color:var(--muted)}
+    .lower{display:grid;grid-template-columns:1fr .9fr;gap:18px;margin-top:18px}
+    .log{min-height:240px;max-height:360px;overflow:auto;display:flex;flex-direction:column;gap:9px;margin-top:17px}
+    .event{border-left:3px solid #517087;background:#112739;border-radius:5px;padding:10px 12px;font-size:12px;animation:pop .25s ease}
+    .event.tcp{border-left-color:var(--cyan)}.event.app{border-left-color:var(--green)}.event.note{border-left-color:var(--amber)}
+    .event strong{display:block;font-size:12px;color:#e1f5ff}.event p{margin:3px 0 0;color:#b3cbda}
+    @keyframes pop{from{transform:translateY(6px);opacity:.2}to{transform:translateY(0);opacity:1}}
+    .code{margin-top:17px;background:#081622;border:1px solid #2a4054;border-radius:10px;padding:15px;color:#cce4f5;font:12px/1.8 ui-monospace,SFMono-Regular,Menlo,monospace;white-space:pre-wrap;overflow-wrap:anywhere}
+    .kw{color:#87d5f5}.val{color:#a4e7b6}.small{margin:16px 0 0;color:#aebfcc;font-size:13px}
+    .footer{border-top:1px solid #223a4b;margin-top:28px;padding-top:22px;color:#8eabc0;font-size:12px}
+    .link{color:#8fe1ff;text-decoration:none}.emphasis{color:#f3fbff;font-weight:700}
+    @media(max-width:700px){.wrap{width:min(100% - 24px,500px)} header{padding-top:22px}.pill{font-size:10px}.stats{grid-template-columns:repeat(2,1fr);margin:25px 0}.stat{padding:12px}.stat strong{font-size:14px}.panel{padding:17px}.network{grid-template-columns:minmax(0,1fr) 48px minmax(0,1fr);gap:6px}.endpoint{padding:12px;min-height:159px}.endpoint .name{font-size:16px}.endpoint .symbol{font-size:23px}.endpoint .address{font-size:10px;padding:7px 4px}.route span{font-size:9px;white-space:normal;top:30px}.lower{grid-template-columns:1fr}.controls button{flex:1;padding:13px 10px;font-size:12px}.step{font-size:11px}}
+    @media(prefers-reduced-motion:reduce){*,*:after,*:before{animation-duration:0.001ms!important;transition:none!important}}
+  </style>
+</head>
+<body>
+<main class="wrap">
+  <header><div class="mark">NETWORK LAB / TCP SOCKETS</div><span class="pill">01 · SOCKET PROGRAMMING</span></header>
+  <section aria-label="Introduction">
+    <div class="label">A FIRST CLICK MOMENT</div>
+    <h1>One robot.<br>Two sockets.<br><em>A real TCP conversation.</em></h1>
+    <p class="lead">Explore how an autonomous mobile robot application connects to a fleet server, sends a message, and gets an application-level confirmation.</p>
+    <div class="callout"><span class="dot"></span>Interactive browser simulation · Actual runnable TCP source code included</div>
+  </section>
+  <div class="stats" aria-label="TCP lab parameters">
+    <div class="stat"><span>Transport</span><strong>TCP</strong></div>
+    <div class="stat"><span>Host</span><strong>127.0.0.1</strong></div>
+    <div class="stat"><span>Server port</span><strong>12000</strong></div>
+    <div class="stat"><span>App framing</span><strong>JSON + \n</strong></div>
+  </div>
+  <section class="panel">
+    <div class="section-header"><h2>Make the connection</h2><span class="step" id="stepLabel">STEP 1 OF 2</span></div>
+    <div class="network" aria-label="Robot client connects to fleet server">
+      <div class="endpoint"><div><span class="symbol" aria-hidden="true">🤖</span><div class="name">AMR-01</div><div class="role">TCP client process</div></div><div class="address">127.0.0.1:<span id="clientPort">ephemeral</span></div></div>
+      <div class="route" id="route"><div class="packet"></div><span id="routeLabel">Not connected</span></div>
+      <div class="endpoint"><div><span class="symbol" aria-hidden="true">🖥️</span><div class="name">Fleet server</div><div class="role">TCP server process</div></div><div class="address">127.0.0.1:12000</div></div>
+    </div>
+    <div class="controls">
+      <button class="primary" id="connectBtn">1 · Connect</button>
+      <button class="secondary" id="sendBtn" disabled>2 · Send status</button>
+      <button class="ghost" id="resetBtn">↻ Reset</button>
+    </div>
+    <div class="hint" id="instruction">Press Connect to visualize the OS-managed three-way TCP handshake.</div>
+  </section>
+  <div class="lower">
+    <section class="panel"><h2>Event timeline</h2><div class="log" id="log" role="log" aria-live="polite" aria-relevant="additions"><div class="event note"><strong>READY · Server listening</strong><p>The server has called bind() and listen(). No client is connected yet.</p></div></div></section>
+    <section class="panel"><h2>Application messages</h2><div class="code"><span class="kw">CLIENT → SERVER</span>
+{
+  <span class="val">"type"</span>: "robot_status",
+  <span class="val">"robot_id"</span>: "AMR-01",
+  <span class="val">"status"</span>: "mission_complete"
+}
+
+<span class="kw">SERVER → CLIENT</span>
+{
+  <span class="val">"type"</span>: "status_ack",
+  <span class="val">"accepted"</span>: true
+}</div><p class="small">The response labeled <span class="emphasis">status_ack</span> is an application message, not the TCP protocol's acknowledgement packet.</p></section>
+  </div>
+  <section class="panel" style="margin-top:18px">
+    <h2>What you're actually learning</h2>
+    <p class="small">The <span class="emphasis">socket API</span> connects application processes to transport services. The operating system manages TCP connection establishment, sequence numbers, and acknowledgments. Your application chooses the message format and when a message has been processed.</p>
+    <p class="small"><strong>Important:</strong> This browser page simulates events for visualization. It does <em>not</em> open a TCP socket. The companion <span class="emphasis">client.py</span> and <span class="emphasis">server.py</span> actually communicate using TCP on localhost.</p>
+  </section>
+  <footer class="footer">Synthetic manufacturing example · No company infrastructure, robot telemetry, or production IP addresses used · Built for technical learning and public sharing</footer>
+</main>
+<script>
+  (function(){
+    const connect=document.getElementById('connectBtn'),send=document.getElementById('sendBtn'),reset=document.getElementById('resetBtn'),log=document.getElementById('log'),route=document.getElementById('route'),routeLabel=document.getElementById('routeLabel'),clientPort=document.getElementById('clientPort'),instruction=document.getElementById('instruction'),stepLabel=document.getElementById('stepLabel');
+    let step=0;
+    function add(kind,title,details){let e=document.createElement('div');e.className='event '+kind;let h=document.createElement('strong');h.textContent=title;let p=document.createElement('p');p.textContent=details;e.append(h,p);log.appendChild(e);log.scrollTop=log.scrollHeight;}
+    function pulse(){route.classList.remove('active');void route.offsetWidth;route.classList.add('active');setTimeout(()=>route.classList.remove('active'),2150)}
+    connect.addEventListener('click',()=>{if(step!==0)return;step=1;clientPort.textContent='51624';routeLabel.textContent='ESTABLISHED';routeLabel.style.color='#7be6ad';pulse();add('tcp','TCP · SYN','Client OS initiates connection establishment to 127.0.0.1:12000.');add('tcp','TCP · SYN-ACK','Server OS responds with synchronization and acknowledgement.');add('tcp','TCP · ACK','Client OS acknowledges; the TCP connection is established.');add('note','APP · connect() / accept() return','Processes have connected sockets; applications can now exchange byte streams.');connect.disabled=true;send.disabled=false;stepLabel.textContent='STEP 2 OF 2';instruction.textContent='TCP is established. Now send an application-level robot status.';});
+    send.addEventListener('click',()=>{if(step!==1)return;step=2;pulse();add('app','APP · client.sendall()','AMR-01 submits newline-delimited JSON bytes to its TCP socket.');add('tcp','TCP · reliable byte stream','The operating system handles data transmission and TCP acknowledgements.');add('app','APP · server.recv()','Server reads the bytes and parses one JSON message (newline framing).');add('app','APP · server.sendall()','Server returns status_ack { accepted: true } as an application message.');add('app','APP · client.recv()','Client receives status_ack: proof of application processing in this lab.');send.disabled=true;stepLabel.textContent='EXCHANGE COMPLETE';instruction.textContent='Success! You have visualized connection establishment plus one request/response. Reset to try again.';routeLabel.textContent='Message delivered';});
+    reset.addEventListener('click',()=>{step=0;connect.disabled=false;send.disabled=true;clientPort.textContent='ephemeral';routeLabel.textContent='Not connected';routeLabel.style.color='';stepLabel.textContent='STEP 1 OF 2';instruction.textContent='Press Connect to visualize the OS-managed three-way TCP handshake.';log.innerHTML='';add('note','READY · Server listening','The server has called bind() and listen(). No client is connected yet.');});
+  })();
+</script>
+</body>
+</html>
