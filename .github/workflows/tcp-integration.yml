@@ -18,3 +18,5 @@ jobs:
           python-version: "3.12"
       - name: Run real loopback TCP integration test
         run: python -m unittest discover -s labs/tcp-socket/tests -v
+      - name: Run localhost HTTP proxy integration test
+        run: python -m unittest discover -s labs/http-proxy/tests -v
