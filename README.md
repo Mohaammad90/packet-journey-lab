@@ -34,6 +34,16 @@ The browser page at [`labs/tcp-socket/index.html`](labs/tcp-socket/index.html) i
 
 **First-click insight:** Successful delivery of TCP bytes is not proof that the receiving *application* parsed or accepted the message. The JSON `status_ack` is application-level confirmation, distinct from a TCP ACK.
 
+## Verified: HTTP conditional requests through a local proxy
+
+A **new localhost HTTP inspection proxy** receives HTTP requests on port `8080`, logs them and forwards them to the Python HTTP server on port `8000`. Automated integration tests verify a **200 OK** with a file body and a conditional **304 Not Modified** response without a body.
+
+**[Run the HTTP proxy lab](labs/http-proxy/README.md)** — `python3 labs/http-proxy/proxy.py`
+
+**Automated test:** `python3 -m unittest discover -s labs/http-proxy/tests -v`
+
+This is a fixed-origin reverse proxy, **not** a full browser-configured caching proxy. The textbook's broader proxy implementation remains unfinished.
+
 ## Evidence and design
 
 - [Socket lab guide](labs/tcp-socket/README.md)
@@ -44,6 +54,7 @@ The browser page at [`labs/tcp-socket/index.html`](labs/tcp-socket/index.html) i
 
 ## Planned — not yet implemented
 
+- Browser-configured caching HTTP proxy / complete textbook P11 task
 - UDP client and server comparison
 - Linux client, router/firewall, and server virtual machines
 - DNS testing and Wireshark/tcpdump packet captures
