@@ -44,6 +44,8 @@ A **new localhost HTTP inspection proxy** receives HTTP requests on port `8080`,
 
 This is a fixed-origin reverse proxy, **not** a full browser-configured caching proxy. The textbook's broader proxy implementation remains unfinished.
 
+**Manual fault injection verified:** The local proxy returned **502** when its origin was stopped, and recovered to **200** when the origin restarted. [Read the outage and recovery evidence](docs/http-proxy-failure-recovery.md).
+
 ## Evidence and design
 
 - [Socket lab guide](labs/tcp-socket/README.md)
@@ -59,7 +61,7 @@ This is a fixed-origin reverse proxy, **not** a full browser-configured caching 
 - Linux client, router/firewall, and server virtual machines
 - DNS testing and Wireshark/tcpdump packet captures
 - TLS handshake and certificate inspection
-- Fault injection for DNS, routing, destination ports, and unavailable servers
+- Additional fault injection for DNS, routing, destination ports, and unavailable hosts beyond the tested localhost origin outage
 
 These are **design targets**, not completed outcomes. Test reports will be added only when experiments are executed.
 
