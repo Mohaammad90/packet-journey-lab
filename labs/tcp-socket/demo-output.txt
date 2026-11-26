@@ -1,0 +1,17 @@
+SYNTHETIC AMR TCP LAB — REAL LOOPBACK EXCHANGE
+
+=== SERVER PROCESS ===
+SERVER listening on 127.0.0.1:37437
+SERVER accepted TCP connection from 127.0.0.1:48000
+SERVER received application message: {'type': 'robot_status', 'robot_id': 'AMR-01', 'status': 'mission_complete'}
+SERVER sent application response: {'type': 'status_ack', 'robot_id': 'AMR-01', 'received_status': 'mission_complete', 'accepted': True}
+SERVER closed client connection
+
+=== CLIENT PROCESS ===
+CLIENT TCP established: 127.0.0.1:48000 -> 127.0.0.1:37437
+CLIENT sent 72 bytes of application data: {'type': 'robot_status', 'robot_id': 'AMR-01', 'status': 'mission_complete'}
+CLIENT received application response: {'type': 'status_ack', 'robot_id': 'AMR-01', 'received_status': 'mission_complete', 'accepted': True}
+CLIENT confirmed server processed the synthetic message
+
+=== RESULT ===
+SUCCESS — actual local TCP socket connection and application-level response confirmed.
